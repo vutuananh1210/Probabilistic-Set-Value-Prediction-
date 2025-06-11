@@ -1,0 +1,10 @@
+# Ignore PDF documents
+*.pdf
+
+# Ignore PNG images
+*.png
+
+
+# Ignore Python bytecode
+*.pyc
+__pycache__/
