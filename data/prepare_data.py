@@ -96,7 +96,7 @@ class ModelRunner(ABC):
 
 # ---- 2.1 single-label (MCC) ---------------------------------------------
 class RFRunner(ModelRunner):
-    def __init__(self, n_estimators=300, random_state=42, n_jobs=-1):
+    def __init__(self, n_estimators=1000, random_state=42, n_jobs=-1):
         self.rf = RandomForestClassifier(
             n_estimators=n_estimators,
             random_state=random_state,
@@ -123,7 +123,7 @@ class BRF(ModelRunner, BaseEstimator, ClassifierMixin):
     Parallelised with joblib.
     """
 
-    def __init__(self, n_estimators=400, n_jobs=-1, random_state=42):
+    def __init__(self, n_estimators=1000, n_jobs=-1, random_state=42):
         self.n_estimators = n_estimators
         self.n_jobs       = n_jobs
         self.random_state = random_state

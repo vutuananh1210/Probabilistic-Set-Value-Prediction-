@@ -413,13 +413,6 @@ class MLC(MDC):
                 results['cautious'][m].append(scores[m])
         return results
 
-
-
-
-
-
-
-
 class PlotterGeneric:
     """
     Generic plotter base class.
@@ -445,24 +438,26 @@ class PlotterGeneric:
                  alpha_vals,
                  results: dict,
                  methods=('cautious', 'abstention'),
+                 acronyms = ('clf_ca', 'clf_ab'),
                  colors=None,
                  save_dir='selected_results'):
         self.data_name = data_name
         self.alpha_vals = np.array(alpha_vals)
         self.results = results
         self.methods = list(methods)
+        self.acronyms = list(acronyms)
 
         # Default color mapping if none provided
         if colors is None:
             default_colors = {
-                'cautious': 'r',
-                'abstention': 'b'
+                'clf_ca': 'r',
+                'clf_ab': 'b'
             }
             # Filter default_colors for the methods we actually have
-            self.colors = {m: default_colors.get(m, None) for m in self.methods}
+            self.colors = {m: default_colors.get(m, None) for m in self.acronyms}
         else:
             # Use provided colors, but ensure there is a color for each method
-            self.colors = {m: colors.get(m, None) for m in self.methods}
+            self.colors = {m: colors.get(m, None) for m in self.acronyms}
 
         self.save_dir = save_dir
         os.makedirs(self.save_dir, exist_ok=True)
@@ -489,14 +484,14 @@ class PlotterGeneric:
         Plot 'set-size' vs. alpha. Skips the first alpha index for both methods.
         """
         fig = plt.figure(figsize=(5, 4))
-        for method in self.methods:
-            yvals = self.results[method]['set-size']
+        for index in range(len(self.methods)):
+            yvals = self.results[self.methods[index]]['set-size']
             plt.plot(
                 self.alpha_vals[1:],
                 yvals[1:],
-                label=f'{method.capitalize()}:siz',
+                label=f'{self.acronyms[index].capitalize()}:siz',
                 linewidth=1,
-                color=self.colors.get(method)
+                color=self.colors.get(self.acronyms[index])
             )
 
         plt.xlabel('Alpha')
@@ -512,13 +507,13 @@ class PlotterGeneric:
         Plot 'singleton prediction' vs. alpha over the full range.
         """
         fig = plt.figure(figsize=(5, 4))
-        for method in self.methods:
+        for index in range(len(self.methods)):
             plt.plot(
                 self.alpha_vals,
-                self.results[method]['singleton prediction'],
-                label=f'{method.capitalize()}:pro',
+                self.results[self.methods[index]]['singleton prediction'],
+                label=f'{self.acronyms[index].capitalize()}:pro',
                 linewidth=1,
-                color=self.colors.get(method)
+                color=self.colors.get(self.acronyms[index])
             )
 
         plt.xlabel('Alpha')
@@ -534,23 +529,23 @@ class PlotterGeneric:
         Plot 'u_alpha' (dashed) and 'recall' (solid) vs. alpha for each method.
         """
         fig = plt.figure(figsize=(5, 4))
-        for method in self.methods:
+        for index in range(len(self.methods)):
             # u_alpha (dashed)
             plt.plot(
                 self.alpha_vals,
-                self.results[method]['u_alpha'],
-                label=f'{method.capitalize()}:ual',
+                self.results[self.methods[index]]['u_alpha'],
+                label=f'{self.acronyms[index].capitalize()}:ual',
                 linestyle='--',
                 linewidth=1,
-                color=self.colors.get(method)
+                color=self.colors.get(self.acronyms[index])
             )
             # recall (solid)
             plt.plot(
                 self.alpha_vals,
-                self.results[method]['recall'],
-                label=f'{method.capitalize()}:rec',
+                self.results[self.methods[index]]['recall'],
+                label=f'{self.acronyms[index].capitalize()}:rec',
                 linewidth=1,
-                color=self.colors.get(method)
+                color=self.colors.get(self.acronyms[index])
             )
 
         plt.xlabel('Alpha')
@@ -567,27 +562,27 @@ class PlotterGeneric:
         skipping the first alpha index for both.
         """
         fig = plt.figure(figsize=(5, 4))
-        for method in self.methods:
+        for index in range(len(self.methods)):
             # correct singleton (dashed)
             plt.plot(
                 self.alpha_vals[1:],
-                self.results[method]['correct singleton prediction'][1:],
-                label=f'{method.capitalize()}:sin',
+                self.results[self.methods[index]]['correct singleton prediction'][1:],
+                label=f'{self.acronyms[index].capitalize()}:sin',
                 linestyle='--',
                 linewidth=1,
-                color=self.colors.get(method)
+                color=self.colors.get(self.acronyms[index])
             )
             # correct set-valued (solid)
             plt.plot(
                 self.alpha_vals[1:],
-                self.results[method]['correct set-valued prediction'][1:],
-                label=f'{method.capitalize()}:set',
+                self.results[self.methods[index]]['correct set-valued prediction'][1:],
+                label=f'{self.acronyms[index].capitalize()}:set',
                 linewidth=1,
-                color=self.colors.get(method)
+                color=self.colors.get(self.acronyms[index])
             )
 
         plt.xlabel('Alpha')
-        plt.ylabel('Correct Singleton and Set-Valued')
+        plt.ylabel('Correct Singleton and Set-Valued Prediction')
         plt.title(f'Data set: {self.data_name.capitalize()}')
         plt.legend()
         plt.grid(True)
@@ -622,17 +617,11 @@ class PlotterMLC(PlotterGeneric):
             alpha_vals=alpha_vals,
             results=results,
             methods=('cautious',),
+            acronyms = ('clf_ca',),
             # only one method, so just assign a color to 'cautious'
-            colors={'cautious': 'r'},
+            colors={'clf_ca': 'r'},
             save_dir=save_dir
         )
-
-
-
-
-
-
-
 
 if __name__ == '__main__':
     # Common alpha values
@@ -642,37 +631,35 @@ if __name__ == '__main__':
     #The following is for MCC or (local) MDC. Uncomment to use it
 
     
-    # dataset_names = ['Pain']
+    dataset_names = ['Pain']
 
-    # for name in dataset_names:
-    #     # Compute the results dict for this dataset
-    #     runner = MDC(name)
-    #     res = runner.compute_results_for_dataset(alphas)
+    for name in dataset_names:
+         # Compute the results dict for this dataset
+         runner = MDC(name)
+         res = runner.compute_results_for_dataset(alphas)
 
-    #     # Create a plotter instance
+         # Create a plotter instance
 
-    #     plotter = PlotterGeneric(
-    #         data_name=name,
-    #         alpha_vals=alphas,
-    #         results=res,
-    #         methods=('cautious', 'abstention'),
-    #         save_dir='selected_results/MDC'
-    #     )
+         plotter = PlotterGeneric(
+             data_name=name,
+             alpha_vals=alphas,
+             results=res,
+             methods=('cautious', 'abstention'),
+             acronyms = ('clf_ca', 'clf_ab'),
+             save_dir='selected_results/MDC'
+         )
         
-    #     # plotter = PlotterMLC(data_name=name,alpha_vals=alphas, results=res)
+         # plotter = PlotterMLC(data_name=name,alpha_vals=alphas, results=res)
 
 
-    #     # Generate and save all four plots
-    #     plotter.plot_all()
-
-
-
+         # Generate and save all four plots
+         plotter.plot_all()
 
     dataset_names = ['scene']
 
     for name in dataset_names:
         # Compute the results dict for this dataset
-        runner = MLC(name,'global')
+        runner = MLC(name,'local')
         res = runner.compute_results_for_dataset(alphas)
 
         # Create a plotter instance
